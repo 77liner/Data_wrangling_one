@@ -1,21 +1,53 @@
 ---
-title: "Simple document"
-output: html_document
+title: "Data import"
+output: github_document
 ---
 
-I'm an R Markdown document! 
-
-# Section 1
-
-Here's a **code chunk** that samples from 
-a _normal distribution_:
-
-```{r}
-samp = rnorm(100)
-length(samp)
+```{r serup}
+library(tidyverse)
+library(readxl)
+library(haven)
 ```
 
-# Section 2
+## read in some csv data
+relative pass: directions to a file or folder from your current working directory
+absolute pass: a file or folder’s “full address” on your computer
+```{r}
+litters_df= read_csv("./data/FAS_litters.csv")
+litters_df= janitor::clean_names(litters_df)
+litters_df2= read_csv("./data/FAS_litters.csv",skip=10)
+#跳过前十行，第一行的label也会被跳过，label变成第十一行的数据#
+litters_df3= read_csv("./data/FAS_litters.csv",skip=10,col_names=FALSE,na=c("","na",999))
+#跳过十行，新建一个label，x1,x2,x3...;定义na，遇到空格，na 和999都定义为na#
+```
+janitor::clean_names 是另一种使用package里面function 的方法
 
-I can take the mean of the sample, too!
-The mean is `r mean(samp)`.
+## other file formats
+
+read in an excel file.
+```{r}
+mlb_df=read_excel("./data/mlb11.xlsx")
+```
+read in a sas file
+```{r}
+pulse_df=read_sas("./data/public_pulse_data.sas7bdat")
+```
+
+## take a look at the date
+1. print in the console
+```{r}
+litters_df
+```
+
+2. 
+```{r}
+head(litters_df)
+tail(litters_df)
+```
+
+3.
+```{r}
+skimr::skim(litters_df)
+```
+
+
