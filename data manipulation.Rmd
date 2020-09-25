@@ -2,29 +2,77 @@
 title: "Data manipulation"
 author: "Liner Ge"
 date: "2020/9/24"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+```{r}
+litters_df=read_csv("./data/FAS_litters.csv")
+litters_df=janitor::clean_names(litters_df)
+```
+choose some columns and not others
+```{r}
+select(litters_df,group,gd0_weight:gd_of_birth)#group 是litters——df里面的variable，后面可以一直选下去，用逗号隔开#
+
+#给group重新命名GROUP#
+select(litters_df,GEOUP=group)
+rename(litters_df,GEOUP=group)
+
+select(litters_df, starts_with("gd"))
+
+#把litter_number放在最前面，保留其他全部
+select(litters_df,litter_number,everything())
+relocate(litters_df,litter_number)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+filter(litters_df, gd0_weigh<=20)
+#xx==20,xx!=20,group=="Mod8",group%in%c("mod7","mod8")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+mutate(
+  litters_df,
+  wt_gain = gd18_weight - gd0_weight,
+  group = str_to_lower(group)#转换大小写
+  )
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+arrange(litters_data, group, pups_born_alive)
+#先按照group，再按照pups_born_alive排序
+drop_na(litters_data, group)
+```
+
+%>% 的使用，
+复杂的形式：
+```{r}
+litters_data_raw = read_csv("./data/FAS_litters.csv",
+  col_types = "ccddiiii")
+litters_data_clean_names = janitor::clean_names(litters_data_raw)
+litters_data_selected_cols = select(litters_data_clean_names, -pups_survive)
+litters_data_with_vars = 
+  mutate(
+    litters_data_selected_cols, 
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group))
+litters_data_with_vars_without_missing = 
+  drop_na(litters_data_with_vars, wt_gain)
+litters_data_with_vars_without_missing
+```
+使用 %>% ， %>% means then do
+```{r}
+litters_data = 
+  read_csv("./data/FAS_litters.csv", col_types = "ccddiiii") %>%
+  janitor::clean_names() %>%
+  select(-pups_survive) %>%
+  mutate(
+    wt_gain = gd18_weight - gd0_weight,
+    group = str_to_lower(group)) %>% 
+  drop_na(wt_gain)
+```
+
+
